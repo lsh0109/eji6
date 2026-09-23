@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國中國文《五柳先生傳》25題綜合測驗</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .quiz-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #475569;
+            font-weight: bold;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn-option {
+            background-color: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 16px;
+            color: #334155;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .btn-option:hover:not(:disabled) {
+            background-color: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .btn-option:disabled {
+            cursor: not-allowed;
+        }
+
+        .btn-option.correct {
+            background-color: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+            font-weight: bold;
+        }
+
+        .btn-option.wrong {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+
+        .feedback {
+            min-height: 28px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .feedback.correct { color: #16a34a; }
+        .feedback.wrong { color: #dc2626; }
+
+        .footer-nav {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-next, .btn-restart {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-next:hover, .btn-restart:hover {
+            background-color: #2563eb;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .result-score {
+            font-size: 56px;
+            font-weight: bold;
+            color: #1e293b;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-card">
+        <!-- 測驗進行區 -->
+        <div id="quiz-screen">
+            <div class="header">
+                <span id="question-count">題目 1 / 25</span>
+                <span id="score-count">得分: 0</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-text" id="question-text">載入中...</div>
+
+            <div class="options-container" id="options-container">
+                <!-- 選項按鈕動態生成 -->
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="footer-nav">
+                <button class="btn-next hidden" id="next-btn" onclick="nextQuestion()">下一題</button>
+            </div>
+        </div>
+
+        <!-- 結果結算區 -->
+        <div id="result-screen" class="hidden result-container">
+            <h2>測驗完成！</h2>
+            <p>您的最終得分為：</p>
+            <div class="result-score" id="final-score">0 / 25</div>
+            <p id="result-comment" style="color: #64748b; font-size: 18px; margin-bottom: 30px;"></p>
+            <button class="btn-restart" onclick="startQuiz()">重新測驗</button>
+        </div>
+    </div>
+
+    <script>
+        // 根據教材內容設計的 25 題題目庫
+        const quizData = [
+            {
+                q: "「黔婁之妻有言：『不戚戚於貧賤，不汲汲於富貴。』」這句話主要呼應了五柳先生的哪一種性格？",
+                options: ["不慕榮利", "好讀書", "性嗜酒", "常著文章自娛"],
+                answer: 0
+            },
+            {
+                q: "「酣觴賦詩，以樂其志」呼應了課文中的哪些敘述？",
+                options: ["閑靜少言、不慕榮利", "性嗜酒、常著文章自娛", "環堵蕭然、不蔽風日", "短褐穿結、單瓢屢空"],
+                answer: 1
+            },
+            {
+                q: "「無懷氏之民歟！葛天氏之民歟！」這句話主要表達什麼意涵？",
+                options: ["抱怨生活物質條件極度匱乏", "讚賞五柳先生過著如上古淳樸自適的生活", "說明自己是古代皇室的後裔", "感嘆亂世中無法實現政治抱負"],
+                answer: 1
+            },
+            {
+                q: "下列哪一個句子使用了「借代」修辭法？",
+                options: ["不戚戚於貧賤，不汲汲於富貴", "酣觴賦詩（觴→酒）", "無懷氏之民歟！葛天氏之民歟！", "宅邊有五柳樹，因以為號焉"],
+                answer: 1
+            },
+            {
+                q: "「黔婁之妻有言：『不戚戚於貧賤，不汲汲於富貴。』」在修辭上同時使用了「類疊」與哪一種修辭？",
+                options: ["借代", "引用", "設問", "擬人"],
+                answer: 1
+            },
+            {
+                q: "「形容綠柳成蔭，繁花似錦的美景，或比喻在曲折艱辛之後絕處逢生」是哪一個成語的釋義？",
+                options: ["桃柳爭妍", "蒲柳之姿", "柳暗花明", "霸陵折柳"],
+                answer: 2
+            },
+            {
+                q: "成語「蒲柳之姿」是用來比喻什麼？",
+                options: ["身體衰弱", "女子發怒的樣子", "春天美好的景色", "送客作別的情意"],
+                answer: 0
+            },
+            {
+                q: "下列哪一個成語是用來指「送客作別」？",
+                options: ["柳啼花怨", "柳綠花紅", "霸陵折柳", "柳眉倒豎"],
+                answer: 2
+            },
+            {
+                q: "成語「柳啼花怨」是用來形容什麼景象？",
+                options: ["春天花木茂盛", "景象淒涼，心境悽惻", "女子面貌姣好", "絕處逢生的轉機"],
+                answer: 1
+            },
+            {
+                q: "《五柳先生傳》的文體屬於下列哪一種？",
+                options: ["記敘文（傳記）", "議論文", "應用文（書信）", "抒情新詩"],
+                answer: 0
+            },
+            {
+                q: "《五柳先生傳》這篇文章的主旨是什麼？",
+                options: ["記述自己如何努力考取功名", "描繪五柳先生不隨俗浮沉、安貧樂道的形象", "記錄與朋友飲酒作樂的日常生活", "批評當時朝政亂象與官場腐敗"],
+                answer: 1
+            },
+            {
+                q: "根據課文結構，五柳先生傳的寫作手法是模仿哪一種體裁的形式來自傳？",
+                options: ["編年體史書", "史吏官傳（史記體）", "寓言故事", "古典小說"],
+                answer: 1
+            },
+            {
+                q: "課文中「閑靜少言，不慕榮利」是寫五柳先生的：",
+                options: ["起居", "志向", "個性", "嗜好"],
+                answer: 2
+            },
+            {
+                q: "五柳先生讀書的態度是「好讀書，不求甚解」，這代表他讀書：",
+                options: ["馬虎隨便，不加思索", "會意領神，不拘泥於字句解釋", "字字精研，務求死背", "只讀聖賢書，不讀雜書"],
+                answer: 1
+            },
+            {
+                q: "「親舊知其如此，或置酒而招之」，句中的「如此」是指五柳先生：",
+                options: ["不慕榮利", "性嗜酒而家貧，不能常得", "忘懷得失", "環堵蕭然"],
+                answer: 1
+            },
+            {
+                q: "「造飲輒盡，期在必醉；既醉而退，曾不吝情去留。」這展現出五柳先生何種性格？",
+                options: ["率真自然、任真自得", "貪婪無度、不講禮貌", "猶豫不決、患得患失", "虛偽矯飾、自命清高"],
+                answer: 0
+            },
+            {
+                q: "「環堵蕭然，不蔽風日；短褐穿結，單瓢屢空」是描繪五柳先生的：",
+                options: ["個性與嗜好", "志向與抱負", "生活景況（居住、衣著、飲食）", "文章作品與論述"],
+                answer: 2
+            },
+            {
+                q: "五柳先生面對匱乏的生活，態度是「晏如也」，「晏如」的意思是：",
+                options: ["焦慮不安", "安然自得的樣子", "憤憤不平", "無可奈何"],
+                answer: 1
+            },
+            {
+                q: "五柳先生寫文章的目的是什麼？",
+                options: ["獲取功名利祿", "炫耀自己的才華", "常著文章自娛，頗示己志", "為了批評朝廷政客"],
+                answer: 2
+            },
+            {
+                q: "「忘懷得失，以此自終」呼應了文章開頭的哪一句話？",
+                options: ["不慕榮利", "先生不知何許人也", "性嗜酒", "好讀書"],
+                answer: 0
+            },
+            {
+                q: "「不戚戚於貧賤」中的「戚戚」意思是：",
+                options: ["高興貌", "憂慮不安貌", "急切追求貌", "親近貌"],
+                answer: 1
+            },
+            {
+                q: "「不汲汲於富貴」中的「汲汲」意思是：",
+                options: ["急切追求貌", "憂慮不安貌", "非常冷淡貌", "從容不迫貌"],
+                answer: 0
+            },
+            {
+                q: "「短褐穿結」中的「穿結」是指：",
+                options: ["衣服精美華麗", "破爛打補丁（打結）", "穿戴整齊", "長度過長"],
+                answer: 1
+            },
+            {
+                q: "成語「桃柳爭妍」常用來形容：",
+                options: ["春天桃李/花木盛開的美景", "兩個人爭吵不休", "女子身材苗條", "官場上的權勢爭奪"],
+                answer: 0
+            },
+            {
+                q: "成語「柳眉倒豎」通常用來形容：",
+                options: ["春天微風吹拂柳樹", "女子發怒時的樣子", "悲傷落淚的情景", "形容身體極度虛弱"],
+                answer: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const currentData = quizData[currentQuestionIndex];
+            
+            // 更新進度與標題
+            document.getElementById('question-count').textContent = `題目 ${currentQuestionIndex + 1} / ${quizData.length}`;
+            document.getElementById('score-count').textContent = `得分: ${score}`;
+            document.getElementById('progress-bar').style.width = `${((currentQuestionIndex) / quizData.length) * 100}%`;
+            document.getElementById('question-text').textContent = `${currentQuestionIndex + 1}. ${currentData.q}`;
+            
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // 渲染選項
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const optionLabels = ['(A)', '(B)', '(C)', '(D)'];
+            currentData.options.forEach((optionText, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn-option';
+                button.textContent = `${optionLabels[index]} ${optionText}`;
+                button.onclick = () => selectOption(button, index, currentData.answer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectOption(selectedBtn, selectedIndex, correctIndex) {
+            const buttons = document.querySelectorAll('.btn-option');
+            buttons.forEach(btn => btn.disabled = true); // 鎖定所有按鈕
+
+            const feedback = document.getElementById('feedback');
+
+            if (selectedIndex === correctIndex) {
+                selectedBtn.classList.add('correct');
+                feedback.textContent = '答對了！👏';
+                feedback.classList.add('correct');
+                score++;
+            } else {
+                selectedBtn.classList.add('wrong');
+                buttons[correctIndex].classList.add('correct');
+                feedback.textContent = `答錯了！正確答案是 (${['A','B','C','D'][correctIndex]})`;
+                feedback.classList.add('wrong');
+            }
+
+            document.getElementById('score-count').textContent = `得分: ${score}`;
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            document.getElementById('final-score').textContent = `${score} / ${quizData.length}`;
+            
+            const comment = document.getElementById('result-comment');
+            const percentage = (score / quizData.length) * 100;
+
+            if (percentage === 100) {
+                comment.textContent = '太強了！完全掌握《五柳先生傳》重點！💯';
+            } else if (percentage >= 80) {
+                comment.textContent = '表現非常棒！對課文與成語修辭相當熟練！👍';
+            } else if (percentage >= 60) {
+                comment.textContent = '及格囉！再稍微複習一下成語與字義會更好！💪';
+            } else {
+                comment.textContent = '要再多加油喔！建議重新閱讀課文與成語彙整！📖';
+            }
+        }
+
+        // 初始化開始
+        startQuiz();
+    </script>
+</body>
+</html>
